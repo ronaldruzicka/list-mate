@@ -15,7 +15,12 @@
       return '';
     }
     const formattedDate = typeof date === 'string' ? new Date(date) : date;
-    return formattedDate.toLocaleDateString('en-US', {
+
+    if (isNaN(formattedDate.getTime())) {
+      return '';
+    }
+
+    return formattedDate.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',

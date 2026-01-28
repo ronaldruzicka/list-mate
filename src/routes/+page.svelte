@@ -54,9 +54,8 @@
 
     if (index !== -1) {
       items = items.with(index, { ...items[index], checked });
+      lastModified = new Date();
     }
-
-    lastModified = new Date();
   }
 
   function handleMenuClick(id: string) {
@@ -65,7 +64,7 @@
   }
 
   function handleAddItem() {
-    const newId = String(items.length + 1);
+    const newId = crypto.randomUUID();
 
     items = [
       ...items,
