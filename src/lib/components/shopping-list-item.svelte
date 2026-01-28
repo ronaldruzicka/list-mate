@@ -1,0 +1,87 @@
+<script lang="ts">
+  import { Checkbox } from '$lib/components/ui/checkbox/index.js';
+  import { EllipsisVertical } from '@lucide/svelte';
+
+  type Props = {
+    id: string;
+    name: string;
+    checked?: boolean;
+    quantity?: string;
+    onToggle?: (id: string, checked: boolean) => void;
+    onMenuClick?: (id: string) => void;
+  };
+
+  let { id, name, checked = false, quantity, onToggle, onMenuClick }: Props = $props();
+
+  function handleCheckedChange(value: boolean | 'indeterminate') {
+    if (value !== 'indeterminate') {
+      onToggle?.(id, value);
+    }
+  }
+
+  function handleMenuClick() {
+    onMenuClick?.(id);
+  }
+</script>
+
+<div
+  class="shopping-list-item group flex items-center gap-4 py-4 px-2 hover:bg-card/50 rounded-xl transition-all duration-200"
+>
+  <div class="checkbox-wrapper relative flex items-center justify-center">
+    <Checkbox
+      id="item-{id}"
+      {checked}
+      onCheckedChange={handleCheckedChange}
+      class="h-6 w-6 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all duration-300"
+    />
+    {#if checked}
+      <div
+        class="absolute inset-0 rounded-full bg-primary/20 animate-ping pointer-events-none"
+        style="animation-iteration-count: 1;"
+      ></div>
+    {/if}
+  </div>
+
+  <label
+    for="item-{id}"
+    class="flex-1 cursor-pointer select-none text-base font-medium transition-all duration-200 {checked
+      ? 'text-muted-foreground line-through'
+      : 'text-foreground'}"
+  >
+    <span class="item-name">{name}</span>
+    {#if quantity}
+      <span class="text-sm text-muted-foreground ml-2">({quantity})</span>
+    {/if}
+  </label>
+
+  <button
+    type="button"
+    class="menu-button p-2 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent transition-all duration-200 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+    onclick={handleMenuClick}
+    aria-label="Item options"
+  >
+    <EllipsisVertical class="h-5 w-5 text-muted-foreground" />
+  </button>
+</div>
+
+<style>
+  .shopping-list-item {
+    position: relative;
+  }
+
+  .shopping-list-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 3.5rem;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  @media (hover: none) {
+    .menu-button {
+      opacity: 1;
+    }
+  }
+</style>
