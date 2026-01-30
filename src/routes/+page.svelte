@@ -24,48 +24,139 @@
     },
   });
 
+  import { DEFAULT_CATEGORIES } from '$lib/constants';
+
   type ShoppingItem = {
     id: string;
     name: string;
     checked: boolean;
     quantity?: string;
+    categoryId?: string;
+  };
+
+  const getCategory = (id?: string) => {
+    return DEFAULT_CATEGORIES.find((c) => c.id === id);
   };
 
   let items = $state<ShoppingItem[]>([
-    { id: '1', name: 'Milk', checked: true, quantity: '2 liters' },
-    { id: '2', name: 'Eggs', checked: true, quantity: '12 pcs' },
-    { id: '3', name: 'Bread', checked: false, quantity: '1 loaf' },
-    { id: '4', name: 'Butter', checked: false, quantity: '250g' },
-    { id: '5', name: 'Cheese', checked: false, quantity: '200g' },
-    { id: '6', name: 'Tomatoes', checked: true, quantity: '500g' },
-    { id: '7', name: 'Onions', checked: false, quantity: '1 kg' },
-    { id: '8', name: 'Garlic', checked: false, quantity: '3 heads' },
-    { id: '9', name: 'Olive Oil', checked: true },
-    { id: '10', name: 'Pasta', checked: false, quantity: '500g' },
-    { id: '11', name: 'Chicken Breast', checked: false, quantity: '500g' },
-    { id: '12', name: 'Apples', checked: false, quantity: '1 kg' },
-    { id: '13', name: 'Bananas', checked: true, quantity: '1 bunch' },
-    { id: '14', name: 'Yogurt', checked: false, quantity: '4 packs' },
-    { id: '15', name: 'Coffee Beans', checked: false, quantity: '250g' },
-    { id: '16', name: 'Toilet Paper', checked: true, quantity: '8 rolls' },
-    { id: '17', name: 'Dish Soap', checked: false, quantity: '1 bottle' },
-    { id: '18', name: 'Rice', checked: false, quantity: '1 kg' },
-    { id: '19', name: 'Spinach', checked: true, quantity: '100g' },
-    { id: '20', name: 'Lemons', checked: false, quantity: '3 pcs' },
+    { id: '1', name: 'Milk', checked: true, quantity: '2 liters', categoryId: 'dairy-and-eggs' },
+    { id: '2', name: 'Eggs', checked: true, quantity: '12 pcs', categoryId: 'dairy-and-eggs' },
+    { id: '3', name: 'Bread', checked: false, quantity: '1 loaf', categoryId: 'bakery' },
+    { id: '4', name: 'Butter', checked: false, quantity: '250g', categoryId: 'dairy-and-eggs' },
+    { id: '5', name: 'Cheese', checked: false, quantity: '200g', categoryId: 'dairy-and-eggs' },
+    {
+      id: '6',
+      name: 'Tomatoes',
+      checked: true,
+      quantity: '500g',
+      categoryId: 'fruit-and-vegetables',
+    },
+    {
+      id: '7',
+      name: 'Onions',
+      checked: false,
+      quantity: '1 kg',
+      categoryId: 'fruit-and-vegetables',
+    },
+    {
+      id: '8',
+      name: 'Garlic',
+      checked: false,
+      quantity: '3 heads',
+      categoryId: 'fruit-and-vegetables',
+    },
+    { id: '9', name: 'Olive Oil', checked: true, categoryId: 'cans-and-jars' },
+    { id: '10', name: 'Pasta', checked: false, quantity: '500g', categoryId: 'cans-and-jars' },
+    { id: '11', name: 'Chicken Breast', checked: false, quantity: '500g', categoryId: 'meat' },
+    {
+      id: '12',
+      name: 'Apples',
+      checked: false,
+      quantity: '1 kg',
+      categoryId: 'fruit-and-vegetables',
+    },
+    {
+      id: '13',
+      name: 'Bananas',
+      checked: true,
+      quantity: '1 bunch',
+      categoryId: 'fruit-and-vegetables',
+    },
+    { id: '14', name: 'Yogurt', checked: false, quantity: '4 packs', categoryId: 'dairy-and-eggs' },
+    { id: '15', name: 'Coffee Beans', checked: false, quantity: '250g', categoryId: 'beverages' },
+    {
+      id: '16',
+      name: 'Toilet Paper',
+      checked: true,
+      quantity: '8 rolls',
+      categoryId: 'personal-care',
+    },
+    {
+      id: '17',
+      name: 'Dish Soap',
+      checked: false,
+      quantity: '1 bottle',
+      categoryId: 'cleaning-and-laundry',
+    },
+    { id: '18', name: 'Rice', checked: false, quantity: '1 kg', categoryId: 'cans-and-jars' },
+    {
+      id: '19',
+      name: 'Spinach',
+      checked: true,
+      quantity: '100g',
+      categoryId: 'fruit-and-vegetables',
+    },
+    {
+      id: '20',
+      name: 'Lemons',
+      checked: false,
+      quantity: '3 pcs',
+      categoryId: 'fruit-and-vegetables',
+    },
   ]);
 
   let lastModified = $state(new Date());
 
-  let uncompletedItems = $derived.by(() => {
-    return items.filter((item) => {
-      return !item.checked;
-    });
+  let uncompletedGrouped = $derived.by(() => {
+    const groups: Record<string, ShoppingItem[]> = {};
+
+    items
+      .filter((item) => !item.checked)
+      .forEach((item) => {
+        const cid = item.categoryId || 'other';
+        if (!groups[cid]) {
+          groups[cid] = [];
+        }
+        groups[cid].push(item);
+      });
+
+    return Object.entries(groups)
+      .map(([cid, groupItems]) => ({
+        category: getCategory(cid) || getCategory('other')!,
+        items: groupItems,
+      }))
+      .toSorted((a, b) => a.category.sortOrder - b.category.sortOrder);
   });
 
-  let completedItems = $derived.by(() => {
-    return items.filter((item) => {
-      return item.checked;
-    });
+  let completedGrouped = $derived.by(() => {
+    const groups: Record<string, ShoppingItem[]> = {};
+
+    items
+      .filter((item) => item.checked)
+      .forEach((item) => {
+        const cid = item.categoryId || 'other';
+        if (!groups[cid]) {
+          groups[cid] = [];
+        }
+        groups[cid].push(item);
+      });
+
+    return Object.entries(groups)
+      .map(([cid, groupItems]) => ({
+        category: getCategory(cid) || getCategory('other')!,
+        items: groupItems,
+      }))
+      .toSorted((a, b) => a.category.sortOrder - b.category.sortOrder);
   });
 
   function handleToggle(id: string, checked: boolean) {
@@ -93,6 +184,7 @@
         id: newId,
         name: 'New Item',
         checked: false,
+        categoryId: 'other',
       },
     ];
 
@@ -127,50 +219,81 @@
     </div>
 
     <!-- Items List: Scrollable -->
-    <div class="items-list flex-1 overflow-y-auto px-6 pb-32 pt-2 scroll-smooth">
-      {#each uncompletedItems as item (item.id)}
-        <div
-          in:receive={{ key: item.id }}
-          out:send={{ key: item.id }}
-          animate:flip={{ duration: 400 }}
-        >
-          <ShoppingListItem
-            id={item.id}
-            name={item.name}
-            checked={item.checked}
-            quantity={item.quantity}
-            onToggle={handleToggle}
-            onMenuClick={handleMenuClick}
-          />
+    <div class="items-list flex-1 overflow-y-auto px-6 pb-32 scroll-smooth pt-0">
+      {#each uncompletedGrouped as group (group.category.id)}
+        <div class="category-group mb-4">
+          <div
+            class="category-header sticky top-0 bg-background z-10 pt-3 pb-2 mb-1 flex items-center gap-2"
+          >
+            <span class="text-sm">{group.category.icon}</span>
+            <span
+              class="text-xs font-bold uppercase tracking-wider"
+              style="color: {group.category.color}"
+            >
+              {group.category.name}
+            </span>
+          </div>
+
+          <div class="category-items space-y-1">
+            {#each group.items as item (item.id)}
+              <div
+                in:receive={{ key: item.id }}
+                out:send={{ key: item.id }}
+                animate:flip={{ duration: 400 }}
+              >
+                <ShoppingListItem
+                  id={item.id}
+                  name={item.name}
+                  checked={item.checked}
+                  quantity={item.quantity}
+                  category={group.category}
+                  onToggle={handleToggle}
+                  onMenuClick={handleMenuClick}
+                />
+              </div>
+            {/each}
+          </div>
         </div>
       {/each}
 
-      {#if completedItems.length > 0}
-        {#if uncompletedItems.length > 0}
-          <div
-            class="separator-container py-6"
-            transition:slide={{ duration: 300, easing: quintOut }}
-          >
-            <div class="separator"></div>
-            <span class="separator-text">Completed</span>
-          </div>
-        {/if}
+      {#if completedGrouped.length > 0}
+        <div
+          class="separator-container py-6"
+          transition:slide={{ duration: 300, easing: quintOut }}
+        >
+          <div class="separator"></div>
+          <span class="separator-text">Completed</span>
+        </div>
 
-        {#each completedItems as item (item.id)}
-          <div
-            class="completed-item"
-            in:receive={{ key: item.id }}
-            out:send={{ key: item.id }}
-            animate:flip={{ duration: 400 }}
-          >
-            <ShoppingListItem
-              id={item.id}
-              name={item.name}
-              checked={item.checked}
-              quantity={item.quantity}
-              onToggle={handleToggle}
-              onMenuClick={handleMenuClick}
-            />
+        {#each completedGrouped as group (group.category.id)}
+          <div class="category-group mb-4 opacity-60 grayscale-[0.5]">
+            <div class="category-header flex items-center gap-2 py-2 mb-1 bg-background">
+              <span class="text-sm">{group.category.icon}</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {group.category.name}
+              </span>
+            </div>
+
+            <div class="category-items space-y-1">
+              {#each group.items as item (item.id)}
+                <div
+                  class="completed-item"
+                  in:receive={{ key: item.id }}
+                  out:send={{ key: item.id }}
+                  animate:flip={{ duration: 400 }}
+                >
+                  <ShoppingListItem
+                    id={item.id}
+                    name={item.name}
+                    checked={item.checked}
+                    quantity={item.quantity}
+                    category={group.category}
+                    onToggle={handleToggle}
+                    onMenuClick={handleMenuClick}
+                  />
+                </div>
+              {/each}
+            </div>
           </div>
         {/each}
       {/if}

@@ -1,17 +1,20 @@
 <script lang="ts">
   import { Checkbox } from '$lib/components/ui/checkbox/index.js';
   import { EllipsisVertical } from '@lucide/svelte';
+  import { Badge } from '$lib/components/ui/badge/index.js';
+  import type { Category } from '$lib/constants';
 
   type Props = {
     id: string;
     name: string;
     checked?: boolean;
     quantity?: string;
+    category: Category;
     onToggle?: (id: string, checked: boolean) => void;
     onMenuClick?: (id: string) => void;
   };
 
-  let { id, name, checked = false, quantity, onToggle, onMenuClick }: Props = $props();
+  let { id, name, checked = false, quantity, category, onToggle, onMenuClick }: Props = $props();
 
   function handleToggle(event: MouseEvent | KeyboardEvent) {
     // Only toggle if we didn't click the menu button
@@ -61,10 +64,14 @@
       ? 'text-muted-foreground line-through'
       : 'text-foreground'}"
   >
-    <span class="item-name">{name}</span>
-    {#if quantity}
-      <span class="text-sm text-muted-foreground ml-2">({quantity})</span>
-    {/if}
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-center gap-2">
+        <span class="item-name">{name}</span>
+        {#if quantity}
+          <span class="text-sm text-muted-foreground">({quantity})</span>
+        {/if}
+      </div>
+    </div>
   </div>
 
   <button
