@@ -13,25 +13,39 @@
 
   let { id, name, checked = false, quantity, onToggle, onMenuClick }: Props = $props();
 
-  function handleCheckedChange(value: boolean | 'indeterminate') {
-    if (value !== 'indeterminate') {
-      onToggle?.(id, value);
+  function handleToggle(event: MouseEvent | KeyboardEvent) {
+    // Only toggle if we didn't click the menu button
+    const target = event.target as HTMLElement;
+    if (target.closest('.menu-button')) {
+      return;
     }
+
+    // Handle accessibility: Enter or Space for keyboard users
+    if (event instanceof KeyboardEvent && event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    onToggle?.(id, !checked);
   }
 
-  function handleMenuClick() {
+  function handleMenuClick(event: MouseEvent) {
+    event.stopPropagation();
     onMenuClick?.(id);
   }
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
-  class="shopping-list-item group flex items-center gap-4 py-4 px-2 hover:bg-card/50 rounded-xl transition-all duration-200"
+  role="button"
+  tabindex="0"
+  onclick={handleToggle}
+  onkeydown={handleToggle}
+  class="shopping-list-item group flex items-center gap-4 py-4 px-2 hover:bg-card/50 rounded-xl transition-all duration-200 cursor-pointer"
 >
-  <div class="checkbox-wrapper relative flex items-center justify-center">
+  <div class="checkbox-wrapper relative flex items-center justify-center pointer-events-none">
     <Checkbox
       id="item-{id}"
       {checked}
-      onCheckedChange={handleCheckedChange}
       class="h-6 w-6 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all duration-300"
     />
     {#if checked}
@@ -42,9 +56,8 @@
     {/if}
   </div>
 
-  <label
-    for="item-{id}"
-    class="flex-1 cursor-pointer select-none text-base font-medium transition-all duration-200 {checked
+  <div
+    class="flex-1 select-none text-base font-medium transition-all duration-200 {checked
       ? 'text-muted-foreground line-through'
       : 'text-foreground'}"
   >
@@ -52,7 +65,7 @@
     {#if quantity}
       <span class="text-sm text-muted-foreground ml-2">({quantity})</span>
     {/if}
-  </label>
+  </div>
 
   <button
     type="button"

@@ -2,6 +2,27 @@
   import ShoppingListHeader from '$components/shopping-list-header.svelte';
   import ShoppingListItem from '$components/shopping-list-item.svelte';
   import AddItemButton from '$components/add-item-button.svelte';
+  import { flip } from 'svelte/animate';
+  import { quintOut } from 'svelte/easing';
+  import { crossfade, slide } from 'svelte/transition';
+
+  const [send, receive] = crossfade({
+    duration: (d) => Math.sqrt(d * 200),
+
+    fallback(node, params) {
+      const style = getComputedStyle(node);
+      const transform = style.transform === 'none' ? '' : style.transform;
+
+      return {
+        duration: 400,
+        easing: quintOut,
+        css: (t) => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`,
+      };
+    },
+  });
 
   type ShoppingItem = {
     id: string;
@@ -107,8 +128,12 @@
 
     <!-- Items List: Scrollable -->
     <div class="items-list flex-1 overflow-y-auto px-6 pb-32 pt-2 scroll-smooth">
-      {#each uncompletedItems as item, index (item.id)}
-        <div class="item-enter" style="animation-delay: {index * 50}ms;">
+      {#each uncompletedItems as item (item.id)}
+        <div
+          in:receive={{ key: item.id }}
+          out:send={{ key: item.id }}
+          animate:flip={{ duration: 400 }}
+        >
           <ShoppingListItem
             id={item.id}
             name={item.name}
@@ -123,21 +148,20 @@
       {#if completedItems.length > 0}
         {#if uncompletedItems.length > 0}
           <div
-            class="separator-container py-6 item-enter"
-            style="animation-delay: {uncompletedItems.length * 50}ms;"
+            class="separator-container py-6"
+            transition:slide={{ duration: 300, easing: quintOut }}
           >
             <div class="separator"></div>
             <span class="separator-text">Completed</span>
           </div>
         {/if}
 
-        {#each completedItems as item, index (item.id)}
+        {#each completedItems as item (item.id)}
           <div
-            class="item-enter completed-item"
-            style="animation-delay: {(uncompletedItems.length +
-              (uncompletedItems.length > 0 ? 1 : 0) +
-              index) *
-              50}ms;"
+            class="completed-item"
+            in:receive={{ key: item.id }}
+            out:send={{ key: item.id }}
+            animate:flip={{ duration: 400 }}
           >
             <ShoppingListItem
               id={item.id}
@@ -170,22 +194,6 @@
 </div>
 
 <style>
-  @keyframes itemEnter {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .item-enter {
-    animation: itemEnter 0.3s ease-out forwards;
-    opacity: 0;
-  }
-
   .completed-item {
     opacity: 0.7;
     transition: opacity 0.2s ease;
@@ -239,6 +247,15 @@
   }
 
   .empty-state {
-    animation: itemEnter 0.4s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 </style>
