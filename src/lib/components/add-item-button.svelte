@@ -10,7 +10,7 @@
 </script>
 
 <div
-  class="add-item-wrapper fixed bottom-0 left-0 right-0 bg-linear-to-t from-background via-background/95 to-transparent"
+  class="add-item-wrapper fixed bottom-0 left-0 right-0 bg-linear-to-t from-background via-background/95 to-transparent z-30"
 >
   <div class="max-w-lg mx-auto px-6 pb-6 pt-4">
     <Button
