@@ -5,7 +5,10 @@
   import { flip } from 'svelte/animate';
   import { quintOut } from 'svelte/easing';
   import { crossfade, slide } from 'svelte/transition';
+  import { authClient } from '$lib/auth-client';
+  import { Button } from '$lib/components/ui/button';
 
+  const session = authClient.useSession();
   const [send, receive] = crossfade({
     duration: (d) => Math.sqrt(d * 200),
 
@@ -218,58 +221,19 @@
       />
     </div>
 
-    <!-- Items List: Scrollable -->
-    <div class="items-list flex-1 overflow-y-auto px-6 pb-32 scroll-smooth pt-0">
-      {#each uncompletedGrouped as group (group.category.id)}
-        <div class="category-group mb-4">
-          <div
-            class="category-header sticky top-0 bg-background z-10 pt-3 pb-2 mb-1 flex items-center gap-2"
-          >
-            <span class="text-sm">{group.category.icon}</span>
-            <span
-              class="text-xs font-bold uppercase tracking-wider"
-              style="color: {group.category.color}"
+    {#if $session.data}
+      <!-- Items List: Scrollable -->
+      <div class="items-list flex-1 overflow-y-auto px-6 pb-32 scroll-smooth pt-0">
+        {#each uncompletedGrouped as group (group.category.id)}
+          <div class="category-group mb-4">
+            <div
+              class="category-header sticky top-0 bg-background z-10 pt-3 pb-2 mb-1 flex items-center gap-2"
             >
-              {group.category.name}
-            </span>
-          </div>
-
-          <div class="category-items space-y-1">
-            {#each group.items as item (item.id)}
-              <div
-                in:receive={{ key: item.id }}
-                out:send={{ key: item.id }}
-                animate:flip={{ duration: 400 }}
-              >
-                <ShoppingListItem
-                  id={item.id}
-                  name={item.name}
-                  checked={item.checked}
-                  quantity={item.quantity}
-                  category={group.category}
-                  onToggle={handleToggle}
-                  onMenuClick={handleMenuClick}
-                />
-              </div>
-            {/each}
-          </div>
-        </div>
-      {/each}
-
-      {#if completedGrouped.length > 0}
-        <div
-          class="separator-container py-6"
-          transition:slide={{ duration: 300, easing: quintOut }}
-        >
-          <div class="separator"></div>
-          <span class="separator-text">Completed</span>
-        </div>
-
-        {#each completedGrouped as group (group.category.id)}
-          <div class="category-group mb-4 opacity-60 grayscale-[0.5]">
-            <div class="category-header flex items-center gap-2 py-2 mb-1 bg-background">
               <span class="text-sm">{group.category.icon}</span>
-              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span
+                class="text-xs font-bold uppercase tracking-wider"
+                style="color: {group.category.color}"
+              >
                 {group.category.name}
               </span>
             </div>
@@ -277,7 +241,6 @@
             <div class="category-items space-y-1">
               {#each group.items as item (item.id)}
                 <div
-                  class="completed-item"
                   in:receive={{ key: item.id }}
                   out:send={{ key: item.id }}
                   animate:flip={{ duration: 400 }}
@@ -296,24 +259,79 @@
             </div>
           </div>
         {/each}
-      {/if}
 
-      {#if items.length === 0}
-        <div class="empty-state flex flex-col items-center justify-center py-16 text-center">
+        {#if completedGrouped.length > 0}
           <div
-            class="empty-icon w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4"
+            class="separator-container py-6"
+            transition:slide={{ duration: 300, easing: quintOut }}
           >
-            <span class="text-3xl">🛒</span>
+            <div class="separator"></div>
+            <span class="separator-text">Completed</span>
           </div>
-          <h3 class="text-lg font-medium text-foreground mb-2">No items found</h3>
-          <p class="text-sm text-muted-foreground">Your shopping list is empty. Add some items!</p>
-        </div>
-      {/if}
-    </div>
-  </div>
 
-  <!-- Floating Add Button -->
-  <AddItemButton onClick={handleAddItem} />
+          {#each completedGrouped as group (group.category.id)}
+            <div class="category-group mb-4 opacity-60 grayscale-[0.5]">
+              <div class="category-header flex items-center gap-2 py-2 mb-1 bg-background">
+                <span class="text-sm">{group.category.icon}</span>
+                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.category.name}
+                </span>
+              </div>
+
+              <div class="category-items space-y-1">
+                {#each group.items as item (item.id)}
+                  <div
+                    class="completed-item"
+                    in:receive={{ key: item.id }}
+                    out:send={{ key: item.id }}
+                    animate:flip={{ duration: 400 }}
+                  >
+                    <ShoppingListItem
+                      id={item.id}
+                      name={item.name}
+                      checked={item.checked}
+                      quantity={item.quantity}
+                      category={group.category}
+                      onToggle={handleToggle}
+                      onMenuClick={handleMenuClick}
+                    />
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/each}
+        {/if}
+
+        {#if items.length === 0}
+          <div class="empty-state flex flex-col items-center justify-center py-16 text-center">
+            <div
+              class="empty-icon w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4"
+            >
+              <span class="text-3xl">🛒</span>
+            </div>
+            <h3 class="text-lg font-medium text-foreground mb-2">No items found</h3>
+            <p class="text-sm text-muted-foreground">
+              Your shopping list is empty. Add some items!
+            </p>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Floating Add Button -->
+      <AddItemButton onClick={handleAddItem} />
+    {:else}
+      <div class="flex flex-1 flex-col items-center justify-center p-6 text-center">
+        <div class="mb-6 rounded-full bg-primary/10 p-6">
+          <span class="text-4xl text-primary">📝</span>
+        </div>
+        <h2 class="mb-2 text-2xl font-bold">Welcome to List Mate</h2>
+        <p class="mb-8 text-muted-foreground">
+          Sign in to access your personal shopping list and stay organized.
+        </p>
+        <Button size="lg" href="/auth" class="px-8">Get Started</Button>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
