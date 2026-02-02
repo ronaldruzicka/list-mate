@@ -3,50 +3,87 @@
   import * as Card from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
-  import { Label } from '$lib/components/ui/label';
+  import * as Form from '$lib/components/ui/form';
+  import { superForm, defaults } from 'sveltekit-superforms';
+  import { zod4 } from 'sveltekit-superforms/adapters';
+  import { signInSchema, signUpSchema } from './schema';
+  import { toast } from 'svelte-sonner';
 
-  let email = $state('');
-  let password = $state('');
-  let name = $state('');
   let isLogin = $state(true);
   let isLoading = $state(false);
-  let error = $state<string | null>(null);
+  let authError = $state<string | null>(null);
 
-  async function handleSubmit() {
-    isLoading = true;
-    error = null;
+  const signInForm = superForm(defaults(zod4(signInSchema)), {
+    SPA: true,
+    validators: zod4(signInSchema),
+    async onUpdate({ form }) {
+      if (!form.valid) return;
+      isLoading = true;
+      authError = null;
 
-    try {
-      if (isLogin) {
-        const { error: authError } = await authClient.signIn.email({
-          email,
-          password,
+      try {
+        const { error } = await authClient.signIn.email({
+          email: form.data.email,
+          password: form.data.password,
           callbackURL: '/',
         });
-        if (authError) {
-          error = authError.message || 'Failed to sign in';
+
+        if (error) {
+          const message = error.message || 'Failed to sign in';
+          authError = message;
+          toast.error(message);
+        } else {
+          toast.success('Successfully signed in!');
         }
-      } else {
-        const { error: authError } = await authClient.signUp.email({
-          email,
-          password,
-          name,
-          callbackURL: '/',
-        });
-        if (authError) {
-          error = authError.message || 'Failed to sign up';
-        }
+      } catch (e: any) {
+        const message = e.message || 'An unexpected error occurred';
+        authError = message;
+        toast.error(message);
+      } finally {
+        isLoading = false;
       }
-    } catch (e: any) {
-      error = e.message || 'An unexpected error occurred';
-    } finally {
-      isLoading = false;
-    }
-  }
+    },
+  });
+
+  const signUpForm = superForm(defaults(zod4(signUpSchema)), {
+    SPA: true,
+    validators: zod4(signUpSchema),
+    async onUpdate({ form }) {
+      if (!form.valid) return;
+      isLoading = true;
+      authError = null;
+
+      try {
+        const { error } = await authClient.signUp.email({
+          email: form.data.email,
+          password: form.data.password,
+          name: form.data.name,
+          callbackURL: '/',
+        });
+
+        if (error) {
+          const message = error.message || 'Failed to sign up';
+          authError = message;
+          toast.error(message);
+        } else {
+          toast.success('Account created successfully!');
+        }
+      } catch (e: any) {
+        const message = e.message || 'An unexpected error occurred';
+        authError = message;
+        toast.error(message);
+      } finally {
+        isLoading = false;
+      }
+    },
+  });
+
+  const { form: signInData, enhance: signInEnhance, errors: signInErrors } = signInForm;
+  const { form: signUpData, enhance: signUpEnhance, errors: signUpErrors } = signUpForm;
 </script>
 
 <div
-  class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8"
+  class="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8"
 >
   <Card.Root class="w-full max-w-md">
     <Card.Header>
@@ -64,42 +101,92 @@
       </Card.Description>
     </Card.Header>
     <Card.Content>
-      <form
-        onsubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-        class="space-y-4"
-      >
-        {#if !isLogin}
-          <div class="space-y-2">
-            <Label for="name">Name</Label>
-            <Input id="name" type="text" placeholder="John Doe" bind:value={name} required />
-          </div>
-        {/if}
-        <div class="space-y-2">
-          <Label for="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            bind:value={email}
-            required
-          />
-        </div>
-        <div class="space-y-2">
-          <Label for="password">Password</Label>
-          <Input id="password" type="password" bind:value={password} required />
-        </div>
+      {#if isLogin}
+        <form method="POST" use:signInEnhance class="space-y-4">
+          <Form.Field form={signInForm} name="email">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Email</Form.Label>
+                <Input
+                  {...props}
+                  type="email"
+                  placeholder="name@example.com"
+                  bind:value={$signInData.email}
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
 
-        {#if error}
-          <p class="text-sm font-medium text-destructive">{error}</p>
-        {/if}
+          <Form.Field form={signInForm} name="password">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Password</Form.Label>
+                <Input {...props} type="password" bind:value={$signInData.password} />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
 
-        <Button type="submit" class="w-full" disabled={isLoading}>
-          {isLoading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
-        </Button>
-      </form>
+          {#if authError}
+            <p class="text-sm font-medium text-destructive">{authError}</p>
+          {/if}
+
+          <Button type="submit" class="w-full" disabled={isLoading}>
+            {isLoading ? 'Processing...' : 'Sign In'}
+          </Button>
+        </form>
+      {:else}
+        <form method="POST" use:signUpEnhance class="space-y-4">
+          <Form.Field form={signUpForm} name="name">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Name</Form.Label>
+                <Input
+                  {...props}
+                  type="text"
+                  placeholder="John Doe"
+                  bind:value={$signUpData.name}
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field form={signUpForm} name="email">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Email</Form.Label>
+                <Input
+                  {...props}
+                  type="email"
+                  placeholder="name@example.com"
+                  bind:value={$signUpData.email}
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field form={signUpForm} name="password">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Password</Form.Label>
+                <Input {...props} type="password" bind:value={$signUpData.password} />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          {#if authError}
+            <p class="text-sm font-medium text-destructive">{authError}</p>
+          {/if}
+
+          <Button type="submit" class="w-full" disabled={isLoading}>
+            {isLoading ? 'Processing...' : 'Sign Up'}
+          </Button>
+        </form>
+      {/if}
     </Card.Content>
   </Card.Root>
 </div>
