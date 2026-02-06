@@ -1,5 +1,10 @@
 {
 	"files.associations": {
 		"*.css": "tailwindcss"
+	},
+	"editor.codeActionsOnSave": {
+		"quickfix.biome": "never",
+		"source.fixAll.eslint": "always",
+		"source.organizeImports": "explicit"
 	}
 }

@@ -6,7 +6,7 @@ import * as schema from './schema';
 const databaseUrl = env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is not set');
+	throw new Error('DATABASE_URL environment variable is not set');
 }
 
 const sqlite = new Database(databaseUrl);

@@ -1,56 +1,55 @@
 <script lang="ts">
-  import { ChevronLeft } from '@lucide/svelte';
+	import { ChevronLeft } from '@lucide/svelte';
+	import LinkBtn from './link-btn.svelte';
+	import Badge from './ui/badge/badge.svelte';
 
-  type Props = {
-    title?: string;
-    itemCount?: number;
-    lastModified?: Date | string;
-    onBack?: () => void;
-  };
+	type Props = {
+		title?: string;
+		itemCount?: number;
+		lastModified?: Date | string;
+		onBack?: () => void;
+	};
 
-  let { title = 'Shopping list', itemCount = 0, lastModified, onBack }: Props = $props();
+	let { title = 'Shopping list', itemCount = 0, lastModified, onBack }: Props = $props();
 
-  function formatDate(date: Date | string | undefined): string {
-    if (!date) {
-      return '';
-    }
-    const formattedDate = typeof date === 'string' ? new Date(date) : date;
+	const locale = globalThis.Intl.DateTimeFormat().resolvedOptions().locale;
 
-    if (isNaN(formattedDate.getTime())) {
-      return '';
-    }
+	function formatDate(date: Date | string | undefined): string {
+		if (!date) {
+			return '';
+		}
+		const formattedDate = typeof date === 'string' ? new Date(date) : date;
 
-    return formattedDate.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+		if (isNaN(formattedDate.getTime())) {
+			return '';
+		}
+
+		return formattedDate.toLocaleString(locale ?? 'en-US', {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	}
 </script>
 
-<header class="shopping-list-header py-4 px-2">
-  <div class="flex items-center gap-3 mb-3">
-    <button
-      type="button"
-      class="back-button p-2 -ml-2 rounded-xl hover:bg-accent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring"
-      onclick={onBack}
-      aria-label="Go back"
-    >
-      <ChevronLeft class="h-6 w-6" />
-    </button>
-    <div class="flex-1">
-      <h1 class="text-2xl font-bold tracking-tight">
-        {title}
-        <span class="text-muted-foreground font-normal">({itemCount})</span>
-      </h1>
-    </div>
-  </div>
+<header class="flex gap-2">
+	<LinkBtn class="flex-none" href="/lists" size="icon" variant="ghost">
+		<ChevronLeft class="size-6" />
+	</LinkBtn>
 
-  {#if lastModified}
-    <p class="last-modified text-sm text-muted-foreground ml-10">
-      Last modified {formatDate(lastModified)}
-    </p>
-  {/if}
+	<div class="flex flex-1 flex-col gap-1">
+		<h1 class="flex items-center gap-2 text-2xl font-bold tracking-tight">
+			{title}
+			<!-- <span class="text-muted-foreground font-normal">({itemCount})</span> -->
+			<Badge class="flex-none" variant="default">{itemCount}</Badge>
+		</h1>
+
+		{#if lastModified}
+			<p class="text-muted-foreground text-xs">
+				Last modified {formatDate(lastModified)}
+			</p>
+		{/if}
+	</div>
 </header>

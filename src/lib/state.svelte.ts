@@ -1,11 +1,11 @@
 import { authClient } from './auth-client';
 
 class AppState {
-  isGuestMode = $state(false);
+	isGuestMode = $state(false);
 
-  setGuestMode(value: boolean) {
-    this.isGuestMode = value;
-  }
+	setGuestMode(value: boolean) {
+		this.isGuestMode = value;
+	}
 }
 
 export const appState = new AppState();
