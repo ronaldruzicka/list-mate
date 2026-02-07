@@ -1,8 +1,8 @@
 import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import { defineConfig } from 'eslint/config';
 import svelteConfig from './svelte.config.js';
 
 export default defineConfig([
@@ -18,7 +18,7 @@ export default defineConfig([
 		},
 	},
 	{
-		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+		files: ['**/*.svelte', '**/*.svelte.ts'],
 		// See more details at: https://typescript-eslint.io/packages/parser/
 		languageOptions: {
 			parserOptions: {

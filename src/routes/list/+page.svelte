@@ -190,10 +190,6 @@
 
 		lastModified = new Date();
 	}
-
-	function handleCreateList() {
-		appState.setGuestMode(true);
-	}
 </script>
 
 <svelte:head>
@@ -260,7 +256,9 @@
 			class="relative flex items-center justify-center py-6"
 			transition:slide={{ duration: 300, easing: quintOut }}
 		>
-			<div class="absolute right-0 left-0 h-px bg-linear-to-b from-transparent to-white/20"></div>
+			<div
+				class="to-foreground/20 absolute right-0 left-0 h-px bg-linear-to-b from-transparent"
+			></div>
 			<span
 				class="bg-background text-muted-foreground relative px-4 text-xs font-semibold tracking-wider uppercase"
 				>Completed</span

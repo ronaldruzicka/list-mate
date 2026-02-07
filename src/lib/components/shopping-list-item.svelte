@@ -16,6 +16,10 @@
 	let { id, name, checked = false, quantity, category, onToggle, onMenuClick }: Props = $props();
 
 	function handleToggle(event: MouseEvent | KeyboardEvent) {
+		if (event.target instanceof HTMLElement && event.target.classList.contains('menu-button')) {
+			return;
+		}
+
 		// Handle accessibility: Enter or Space for keyboard users
 		if (event instanceof KeyboardEvent && event.key !== 'Enter' && event.key !== ' ') {
 			return;
@@ -26,6 +30,8 @@
 	}
 
 	function handleMenuClick(event: MouseEvent | KeyboardEvent) {
+		console.log('💬 ~ handleMenuClick ~ event:', event);
+
 		event.stopPropagation();
 		onMenuClick?.(id);
 	}
@@ -71,9 +77,8 @@
 
 	<button
 		type="button"
-		class="hover:bg-accent focus:ring-ring rounded-lg p-2 transition-all duration-200 group-hover:opacity-100 focus:opacity-100 focus:ring-2 focus:outline-none"
+		class="menu-button hover:bg-accent focus:ring-ring rounded-lg p-2 transition-all duration-200 group-hover:opacity-100 focus:opacity-100 focus:ring-2 focus:outline-none"
 		onclick={handleMenuClick}
-		onkeydown={handleMenuClick}
 		aria-label="Item options"
 	>
 		<EllipsisVertical class="text-muted-foreground h-5 w-5" />
