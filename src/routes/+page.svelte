@@ -2,6 +2,13 @@
 	import { authClient } from '$lib/auth-client';
 	import CreateListDialog from '$lib/components/create-list-dialog.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import type { PageData } from './$types';
+
+	type Props = {
+		data: PageData;
+	};
+
+	let { data }: Props = $props();
 
 	const session = authClient.useSession();
 
@@ -9,11 +16,6 @@
 
 	function handleCreateList() {
 		createListDialog?.show();
-	}
-
-	async function handleCreateListSubmit(data: { name: string }) {
-		// TODO: Call the API
-		console.log(data.name);
 	}
 </script>
 
@@ -69,4 +71,4 @@
 	</div>
 </div>
 
-<CreateListDialog bind:this={createListDialog} onSubmit={handleCreateListSubmit} />
+<CreateListDialog bind:this={createListDialog} data={data.form} />
