@@ -9,4 +9,4 @@
 	<div class="flex h-full max-h-full w-full max-w-md flex-col p-6">{@render children()}</div>
 </main>
 
-<Toaster />
+<Toaster position="top-center" richColors />
