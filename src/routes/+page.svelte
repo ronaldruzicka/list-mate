@@ -1,17 +1,17 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
 	import { Button } from '$lib/components/ui/button';
-	import { appState } from '$lib/state.svelte';
 
 	const session = authClient.useSession();
 
 	function handleCreateList() {
-		appState.setGuestMode(true);
+		goto('/list');
 	}
 </script>
 
 <svelte:head>
-	<title>Shopping List | ListMate</title>
+	<title>List Mate</title>
 	<meta
 		name="description"
 		content="Your smart shopping list companion. Keep track of your groceries with ease."

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
+	import * as Card from '$lib/components/ui/card';
 	import * as Form from '$lib/components/ui/form';
-	import { superForm, defaults } from 'sveltekit-superforms';
+	import { Input } from '$lib/components/ui/input';
+	import { toast } from 'svelte-sonner';
+	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
 	import { signInSchema, signUpSchema } from './schema';
-	import { toast } from 'svelte-sonner';
 
 	let isLogin = $state(true);
 	let isLoading = $state(false);
@@ -94,7 +94,10 @@
 				{isLogin ? "Don't have an account?" : 'Already have an account?'}
 				<button
 					class="text-primary font-medium hover:underline"
-					onclick={() => (isLogin = !isLogin)}
+					onclick={() => {
+						isLogin = !isLogin;
+						authError = null;
+					}}
 				>
 					{isLogin ? 'Sign up' : 'Sign in'}
 				</button>

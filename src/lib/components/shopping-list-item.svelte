@@ -21,10 +21,11 @@
 			return;
 		}
 
+		event.preventDefault();
 		onToggle?.(id, !checked);
 	}
 
-	function handleMenuClick(event: MouseEvent) {
+	function handleMenuClick(event: MouseEvent | KeyboardEvent) {
 		event.stopPropagation();
 		onMenuClick?.(id);
 	}
@@ -72,6 +73,7 @@
 		type="button"
 		class="hover:bg-accent focus:ring-ring rounded-lg p-2 transition-all duration-200 group-hover:opacity-100 focus:opacity-100 focus:ring-2 focus:outline-none"
 		onclick={handleMenuClick}
+		onkeydown={handleMenuClick}
 		aria-label="Item options"
 	>
 		<EllipsisVertical class="text-muted-foreground h-5 w-5" />

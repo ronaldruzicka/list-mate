@@ -2,13 +2,10 @@
 	import AddItemButton from '$components/add-item-button.svelte';
 	import ShoppingListHeader from '$components/shopping-list-header.svelte';
 	import ShoppingListItem from '$components/shopping-list-item.svelte';
-	import { authClient } from '$lib/auth-client';
-	import { appState } from '$lib/state.svelte';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
 	import { crossfade, slide } from 'svelte/transition';
 
-	const session = authClient.useSession();
 	const [send, receive] = crossfade({
 		duration: (d) => Math.sqrt(d * 200),
 
@@ -208,7 +205,6 @@
 </svelte:head>
 
 <!-- Header: Sticky/Fixed at top -->
-
 <ShoppingListHeader title="Shopping list" itemCount={items.length} {lastModified} />
 
 {#if items.length === 0}

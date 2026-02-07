@@ -7,10 +7,9 @@
 		title?: string;
 		itemCount?: number;
 		lastModified?: Date | string;
-		onBack?: () => void;
 	};
 
-	let { title = 'Shopping list', itemCount = 0, lastModified, onBack }: Props = $props();
+	let { title = 'Shopping list', itemCount = 0, lastModified }: Props = $props();
 
 	const locale = globalThis.Intl.DateTimeFormat().resolvedOptions().locale;
 

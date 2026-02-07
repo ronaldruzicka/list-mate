@@ -29,7 +29,7 @@ This skill provides instructions and patterns for using Bun as the primary packa
 
 ### Specific Bun Features
 
-- **Run with Bun runtime**: When running scripts that can benefit from Bun's built-in APIs or speed, use `bun --bun <command>`.
+- **Run with Bun runtime**: When running scripts that can benefit from Bun's built-in APIs or speed, use `bun run --bun <command>`.
 
 ## File Integrity
 
