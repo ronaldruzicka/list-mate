@@ -1,12 +1,19 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
+	import CreateListDialog from '$lib/components/create-list-dialog.svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	const session = authClient.useSession();
 
+	let createListDialog: CreateListDialog;
+
 	function handleCreateList() {
-		goto('/list');
+		createListDialog?.show();
+	}
+
+	async function handleCreateListSubmit(data: { name: string }) {
+		// TODO: Call the API
+		console.log(data.name);
 	}
 </script>
 
@@ -61,3 +68,5 @@
 		</div>
 	</div>
 </div>
+
+<CreateListDialog bind:this={createListDialog} onSubmit={handleCreateListSubmit} />
