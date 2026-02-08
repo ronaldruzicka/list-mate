@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { authClient } from '$lib/auth-client';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { createListSchema as schema } from '$lib/schemas';
+	import { createListSchema as schema } from '$lib/db/schema';
+	import { fAwait } from '$lib/helpers/fawait';
+	import { toast } from 'svelte-sonner';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
@@ -14,8 +17,21 @@
 
 	let dialog: HTMLDialogElement;
 
+	const session = authClient.useSession();
+
 	const form = superForm(data, {
 		validators: zod4(schema),
+		onSubmit: async ({ cancel }) => {
+			// Sign in anonymously if user is not logged in
+			if (!session.value?.data?.user) {
+				const [error] = await fAwait(authClient.signIn.anonymous());
+
+				if (error) {
+					cancel();
+					toast.error('Failed to sign in anonymously');
+				}
+			}
+		},
 		onResult: async ({ result }) => {
 			if (result.type === 'redirect') {
 				dialog.close();

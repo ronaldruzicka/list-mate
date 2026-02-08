@@ -5,7 +5,7 @@ import { user } from './auth-schema';
 export const list = sqliteTable('list', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
-	userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
+	userId: text('user_id').references(() => user.id),
 	createdAt: integer('created_at', { mode: 'timestamp_ms' })
 		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 		.notNull(),
