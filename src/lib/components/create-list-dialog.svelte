@@ -52,7 +52,7 @@
 
 <dialog
 	bind:this={dialog}
-	class="bg-background shadow-2xl outline-none"
+	class="bg-background border-border desktop:m-auto desktop:bottom-auto desktop:max-w-lg desktop:rounded-2xl desktop:border desktop:fixed desktop:top-1/2 desktop:-translate-y-1/2 desktop:shadow-2xl backdrop:bg-background/50 bottom-0 m-0 mt-auto w-full max-w-full rounded-t-2xl border-0 border-t shadow-2xl outline-none backdrop:opacity-0 backdrop:backdrop-blur-xs backdrop:transition-[opacity,overlay,display] backdrop:duration-300 backdrop:ease-out"
 	onclose={() => form.reset()}
 	onclick={(event) => {
 		if (event.target === dialog) {
@@ -89,15 +89,6 @@
 
 <style>
 	dialog {
-		margin: 0;
-		margin-top: auto;
-		width: 100%;
-		max-width: 100%;
-		bottom: 0;
-		border: none;
-		border-top-left-radius: 1rem;
-		border-top-right-radius: 1rem;
-		border-top: 1px solid hsl(var(--border));
 		transform: translateY(100%);
 		opacity: 0;
 		transition:
@@ -105,20 +96,21 @@
 			opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
 			overlay 0.3s allow-discrete,
 			display 0.3s allow-discrete;
-	}
 
-	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.4);
-		opacity: 0;
-		transition:
-			opacity 0.3s ease-out,
-			overlay 0.3s allow-discrete,
-			display 0.3s allow-discrete;
+		@media (width >= 80ch) {
+			transform: scale(0.96);
+		}
 	}
 
 	dialog[open] {
 		transform: translateY(0);
 		opacity: 1;
+	}
+
+	@media (width >= 80ch) {
+		dialog[open] {
+			transform: scale(1);
+		}
 	}
 
 	dialog[open]::backdrop {
@@ -133,6 +125,12 @@
 
 		dialog[open]::backdrop {
 			opacity: 0;
+		}
+		@media (width >= 80ch) {
+			dialog[open] {
+				transform: scale(0.96);
+				opacity: 0;
+			}
 		}
 	}
 </style>

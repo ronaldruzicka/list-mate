@@ -8,6 +8,7 @@ import type { RequestEvent } from './$types';
 
 export const load = async () => {
 	const form = await superValidate(zod4(createListSchema));
+
 	return { form };
 };
 
@@ -20,7 +21,11 @@ export const actions = {
 		}
 
 		// Anonymous users will have a null userId; authenticated users will have their ID
-		const userId = locals.user?.id ?? null;
+		const userId = locals.user?.id;
+
+		if (!userId) {
+			return fail(400, { form, message: "Couldn't create your list. Please try again." });
+		}
 
 		const [error, result] = await fAwait(
 			db

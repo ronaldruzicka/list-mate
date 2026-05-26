@@ -125,6 +125,8 @@
 }
 
 @theme {
+	--breakpoint-desktop: 80ch;
+
 	@keyframes float {
 		0%,
 		100% {
