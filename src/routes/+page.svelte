@@ -2,13 +2,6 @@
 	import { authClient } from '$lib/auth-client';
 	import CreateListDialog from '$lib/components/create-list-dialog.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import type { PageData } from './$types';
-
-	type Props = {
-		data: PageData;
-	};
-
-	let { data }: Props = $props();
 
 	const session = authClient.useSession();
 
@@ -71,4 +64,4 @@
 	</div>
 </div>
 
-<CreateListDialog bind:this={createListDialog} data={data.form} />
+<CreateListDialog bind:this={createListDialog} />

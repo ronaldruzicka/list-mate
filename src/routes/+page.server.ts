@@ -6,12 +6,6 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { RequestEvent } from './$types';
 
-export const load = async () => {
-	const form = await superValidate(zod4(createListSchema));
-
-	return { form };
-};
-
 export const actions = {
 	create: async ({ request, locals }: RequestEvent) => {
 		const form = await superValidate(request, zod4(createListSchema));

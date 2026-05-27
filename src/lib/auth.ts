@@ -1,4 +1,5 @@
 import { getRequestEvent } from '$app/server';
+import { env } from '$env/dynamic/private';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { anonymous } from 'better-auth/plugins';
@@ -9,6 +10,7 @@ import * as schema from './db/schema';
 import { list } from './db/schema';
 
 export const auth = betterAuth({
+	baseURL: env.BETTER_AUTH_URL,
 	database: drizzleAdapter(db, {
 		provider: 'sqlite',
 		schema,
@@ -17,7 +19,6 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 	plugins: [
-		sveltekitCookies(getRequestEvent),
 		anonymous({
 			onLinkAccount: async ({ anonymousUser, newUser }) => {
 				// Transfer lists from anonymous user to the new user
@@ -27,6 +28,7 @@ export const auth = betterAuth({
 					.where(eq(list.userId, anonymousUser.user.id));
 			},
 		}),
+		sveltekitCookies(getRequestEvent),
 	],
 	session: {
 		cookieCache: {

@@ -27,7 +27,7 @@ pnpm dev -- --open
 
 ## Database
 
-The app uses SQLite via Drizzle. Schema lives in `src/lib/db/schemas`; migrations are in `drizzle/`.
+The app uses SQLite via Drizzle. Schemas live in `src/lib/db/schemas`; migrations are in `drizzle/`.
 
 | Script             | Description                             |
 | ------------------ | --------------------------------------- |
