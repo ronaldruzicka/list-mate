@@ -1,34 +1,48 @@
 <script lang="ts">
+	import { authClient } from '$lib/auth-client';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
+	import { createListSchema } from '$lib/db/schema';
+	import { fAwait } from '$lib/helpers/fawait';
 	import { toast } from 'svelte-sonner';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
-	import { z } from 'zod';
-
-	const formSchema = z.object({
-		name: z.string().trim().min(1, 'Name is required'),
-	});
-
-	type Props = {
-		onSubmit: (data: z.infer<typeof formSchema>) => Promise<void>;
-	};
-
-	let { onSubmit }: Props = $props();
 
 	let dialog: HTMLDialogElement;
 
-	const form = superForm(defaults({ name: '' }, zod4(formSchema)), {
-		SPA: true,
-		validators: zod4(formSchema),
-		onUpdate: async ({ form }) => {
-			if (form.valid) {
-				try {
-					await onSubmit(form.data);
-					dialog.close();
-				} catch (error) {
-					dialog.close();
-					toast.error('Failed to create list');
+	const session = authClient.useSession();
+
+	const form = superForm(defaults(zod4(createListSchema)), {
+		validators: zod4(createListSchema),
+		onSubmit: async ({ cancel }) => {
+			// Sign in anonymously if user is not logged in
+			if (!session.value?.data?.user) {
+				const [error] = await fAwait(authClient.signIn.anonymous());
+
+				if (error) {
+					cancel();
+					toast.error('Failed to sign in anonymously');
+				}
+			}
+		},
+		onResult: async ({ result }) => {
+			if (result.type === 'redirect') {
+				dialog.close();
+
+				return;
+			}
+
+			if (result.type === 'failure') {
+				const message =
+					typeof result.data === 'object' &&
+					result.data !== null &&
+					'message' in result.data &&
+					typeof result.data.message === 'string'
+						? result.data.message
+						: null;
+
+				if (message) {
+					toast.error(message);
 				}
 			}
 		},
@@ -47,7 +61,7 @@
 
 <dialog
 	bind:this={dialog}
-	class="bg-background shadow-2xl outline-none"
+	class="bg-background border-border desktop:m-auto desktop:bottom-auto desktop:max-w-lg desktop:rounded-2xl desktop:border desktop:fixed desktop:top-1/2 desktop:-translate-y-1/2 desktop:shadow-2xl backdrop:bg-background/50 bottom-0 m-0 mt-auto w-full max-w-full rounded-t-2xl border-0 border-t shadow-2xl outline-none backdrop:opacity-0 backdrop:backdrop-blur-xs backdrop:transition-[opacity,overlay,display] backdrop:duration-300 backdrop:ease-out"
 	onclose={() => form.reset()}
 	onclick={(event) => {
 		if (event.target === dialog) {
@@ -55,7 +69,7 @@
 		}
 	}}
 >
-	<form method="POST" use:enhance class="flex flex-col gap-6 p-6 pb-10">
+	<form method="POST" action="?/create" use:enhance class="flex flex-col gap-6 p-6 pb-10">
 		<div class="flex flex-col gap-2">
 			<h2 class="text-xl font-semibold tracking-tight">Create list</h2>
 			<p class="text-muted-foreground text-sm">Give your new list a name to get started.</p>
@@ -84,15 +98,6 @@
 
 <style>
 	dialog {
-		margin: 0;
-		margin-top: auto;
-		width: 100%;
-		max-width: 100%;
-		bottom: 0;
-		border: none;
-		border-top-left-radius: 1rem;
-		border-top-right-radius: 1rem;
-		border-top: 1px solid hsl(var(--border));
 		transform: translateY(100%);
 		opacity: 0;
 		transition:
@@ -100,20 +105,21 @@
 			opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
 			overlay 0.3s allow-discrete,
 			display 0.3s allow-discrete;
-	}
 
-	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.4);
-		opacity: 0;
-		transition:
-			opacity 0.3s ease-out,
-			overlay 0.3s allow-discrete,
-			display 0.3s allow-discrete;
+		@media (width >= 80ch) {
+			transform: scale(0.96);
+		}
 	}
 
 	dialog[open] {
 		transform: translateY(0);
 		opacity: 1;
+	}
+
+	@media (width >= 80ch) {
+		dialog[open] {
+			transform: scale(1);
+		}
 	}
 
 	dialog[open]::backdrop {
@@ -128,6 +134,12 @@
 
 		dialog[open]::backdrop {
 			opacity: 0;
+		}
+		@media (width >= 80ch) {
+			dialog[open] {
+				transform: scale(0.96);
+				opacity: 0;
+			}
 		}
 	}
 </style>

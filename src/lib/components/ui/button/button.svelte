@@ -1,4 +1,6 @@
 <script lang="ts" module>
+	import { resolve } from '$app/paths';
+	import type { Pathname } from '$app/types';
 	import { cn, type WithElementRef } from '$lib/utils.js';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { tv, type VariantProps } from 'tailwind-variants';
@@ -36,11 +38,13 @@
 	export type ButtonVariant = VariantProps<typeof buttonVariants>['variant'];
 	export type ButtonSize = VariantProps<typeof buttonVariants>['size'];
 
-	export type ButtonProps = WithElementRef<HTMLButtonAttributes> &
-		WithElementRef<HTMLAnchorAttributes> & {
-			variant?: ButtonVariant;
-			size?: ButtonSize;
-		};
+	export type ButtonProps<THref extends Pathname = Pathname> =
+		WithElementRef<HTMLButtonAttributes> &
+			WithElementRef<Omit<HTMLAnchorAttributes, 'href'>> & {
+				href?: THref;
+				variant?: ButtonVariant;
+				size?: ButtonSize;
+			};
 </script>
 
 <script lang="ts">
@@ -62,7 +66,7 @@
 		bind:this={ref}
 		data-slot="button"
 		class={cn(buttonVariants({ variant, size }), className)}
-		href={disabled ? undefined : href}
+		href={disabled ? undefined : resolve(href)}
 		aria-disabled={disabled}
 		role={disabled ? 'link' : undefined}
 		tabindex={disabled ? -1 : undefined}
