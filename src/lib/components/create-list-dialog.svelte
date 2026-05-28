@@ -28,6 +28,22 @@
 		onResult: async ({ result }) => {
 			if (result.type === 'redirect') {
 				dialog.close();
+
+				return;
+			}
+
+			if (result.type === 'failure') {
+				const message =
+					typeof result.data === 'object' &&
+					result.data !== null &&
+					'message' in result.data &&
+					typeof result.data.message === 'string'
+						? result.data.message
+						: null;
+
+				if (message) {
+					toast.error(message);
+				}
 			}
 		},
 	});

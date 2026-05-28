@@ -6,19 +6,26 @@ import ts from 'typescript-eslint';
 import svelteConfig from './svelte.config.js';
 
 export default defineConfig([
+	{
+		ignores: ['**', '!src/', '!src/**'],
+	},
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs.recommended,
 	{
+		files: ['src/**/*.ts', 'src/**/*.svelte', 'src/**/*.svelte.ts'],
 		languageOptions: {
 			globals: {
 				...globals.browser,
 				...globals.node,
 			},
 		},
+		rules: {
+			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+		},
 	},
 	{
-		files: ['**/*.svelte', '**/*.svelte.ts'],
+		files: ['src/**/*.svelte', 'src/**/*.svelte.ts'],
 		// See more details at: https://typescript-eslint.io/packages/parser/
 		languageOptions: {
 			parserOptions: {

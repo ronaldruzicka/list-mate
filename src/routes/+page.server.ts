@@ -14,7 +14,6 @@ export const actions = {
 			return fail(400, { form });
 		}
 
-		// Anonymous users will have a null userId; authenticated users will have their ID
 		const userId = locals.user?.id;
 
 		if (!userId) {

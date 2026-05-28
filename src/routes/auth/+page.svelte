@@ -35,8 +35,8 @@
 				} else {
 					toast.success('Successfully signed in!');
 				}
-			} catch (e: any) {
-				const message = e.message || 'An unexpected error occurred';
+			} catch (event: unknown) {
+				const message = Error.isError(event) ? event.message : 'An unexpected error occurred';
 				authError = message;
 				toast.error(message);
 			} finally {
@@ -68,8 +68,8 @@
 				} else {
 					toast.success('Account created successfully!');
 				}
-			} catch (e: any) {
-				const message = e.message || 'An unexpected error occurred';
+			} catch (event: unknown) {
+				const message = Error.isError(event) ? event.message : 'An unexpected error occurred';
 				authError = message;
 				toast.error(message);
 			} finally {
@@ -78,8 +78,8 @@
 		},
 	});
 
-	const { form: signInData, enhance: signInEnhance, errors: signInErrors } = signInForm;
-	const { form: signUpData, enhance: signUpEnhance, errors: signUpErrors } = signUpForm;
+	const { form: signInData, enhance: signInEnhance } = signInForm;
+	const { form: signUpData, enhance: signUpEnhance } = signUpForm;
 </script>
 
 <div

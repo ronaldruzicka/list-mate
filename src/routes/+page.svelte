@@ -58,7 +58,7 @@
 					Sign up if you want the ability to share a list with someone else.
 				</p>
 			{:else}
-				<Button variant="outline" size="xl" href="/share">Share</Button>
+				<Button variant="outline" size="xl">Share</Button>
 			{/if}
 		</div>
 	</div>
